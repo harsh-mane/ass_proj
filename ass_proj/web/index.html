@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="ass_proj">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>ass_proj</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Add the JavaScript for fullscreen functionality -->
+  <script>
+    // Function to toggle fullscreen mode
+    function toggleFullscreen(imageUrl) {
+      const imgElement = document.createElement('img');
+      imgElement.src = imageUrl;
+      imgElement.style.width = '100%';
+      imgElement.style.height = '100%';
+      imgElement.style.objectFit = 'contain';
+
+      // Check if the document is currently in fullscreen mode
+      if (!document.fullscreenElement) {
+        // Enter fullscreen mode
+        document.documentElement.requestFullscreen().then(() => {
+          document.body.innerHTML = ''; // Clear the body
+          document.body.appendChild(imgElement); // Add the image to the body
+        });
+      } else {
+        // Exit fullscreen mode
+        document.exitFullscreen().then(() => {
+          document.body.innerHTML = ''; // Clear the body
+          window.location.reload(); // Reload the page to return to the Flutter app
+        });
+      }
+    }
+
+    // Expose the function to Dart
+    window.toggleFullscreen = toggleFullscreen;
+  </script>
+</head>
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
