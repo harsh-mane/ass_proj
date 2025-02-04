@@ -74,6 +74,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "get",
+      "rootUri": "file:///C:/Users/Hp/AppData/Local/Pub/Cache/hosted/pub.dev/get-4.6.6",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
       "name": "html",
       "rootUri": "file:///C:/Users/Hp/AppData/Local/Pub/Cache/hosted/pub.dev/html-0.15.5",
       "packageUri": "lib/",
@@ -236,7 +242,7 @@
       "languageVersion": "3.6"
     }
   ],
-  "generated": "2025-02-03T11:02:32.400178Z",
+  "generated": "2025-02-03T12:41:38.822880Z",
   "generator": "pub",
   "generatorVersion": "3.6.1",
   "flutterRoot": "file:///D:/flutter",

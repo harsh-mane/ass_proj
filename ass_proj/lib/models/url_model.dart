@@ -1,4 +1,8 @@
+/// Model class representing URL data.
 class UrlModel {
+  /// The URL string.
   String url;
-  UrlModel({this.url = ""});
+
+  /// Creates a [UrlModel] with an optional [url].
+  UrlModel({this.url = ''});
 }

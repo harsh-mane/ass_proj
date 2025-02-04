@@ -21,32 +21,52 @@
 
   <!-- Add the JavaScript for fullscreen functionality -->
   <script>
+    let imgElement = null; // To track the image element
+
     // Function to toggle fullscreen mode
     function toggleFullscreen(imageUrl) {
-      const imgElement = document.createElement('img');
-      imgElement.src = imageUrl;
-      imgElement.style.width = '100%';
-      imgElement.style.height = '100%';
-      imgElement.style.objectFit = 'contain';
-
-      // Check if the document is currently in fullscreen mode
       if (!document.fullscreenElement) {
         // Enter fullscreen mode
-        document.documentElement.requestFullscreen().then(() => {
-          document.body.innerHTML = ''; // Clear the body
-          document.body.appendChild(imgElement); // Add the image to the body
-        });
+        imgElement = document.createElement('img');
+        imgElement.src = imageUrl;
+        imgElement.style.width = '100%';
+        imgElement.style.height = '100%';
+        imgElement.style.objectFit = 'contain';
+        imgElement.style.backgroundColor = 'black'; // Add a background for better visibility
+        imgElement.style.position = 'fixed';
+        imgElement.style.top = '0';
+        imgElement.style.left = '0';
+        imgElement.style.zIndex = '9999';
+
+        document.body.appendChild(imgElement);
+        imgElement.requestFullscreen();
       } else {
         // Exit fullscreen mode
+        exitFullscreen();
+      }
+    }
+
+    function exitFullscreen() {
+      if (document.fullscreenElement) {
         document.exitFullscreen().then(() => {
-          document.body.innerHTML = ''; // Clear the body
-          window.location.reload(); // Reload the page to return to the Flutter app
+          if (imgElement) {
+            imgElement.remove(); // Remove the image when exiting fullscreen
+            imgElement = null;
+          }
         });
       }
     }
 
-    // Expose the function to Dart
+    // Listen for the ESC key globally
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        exitFullscreen();
+      }
+    });
+
+    // Expose functions to Dart
     window.toggleFullscreen = toggleFullscreen;
+    window.exitFullscreen = exitFullscreen;
   </script>
 </head>
 <body>

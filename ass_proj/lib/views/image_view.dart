@@ -1,109 +1,113 @@
 import 'package:ass_proj/controllers/image_controller.dart';
 import 'package:flutter/material.dart';
-import 'dart:js' as js; 
+import 'package:get/get.dart';
+import 'dart:js' as js;
+import 'dart:html' as html; // Required for keyboard event handling
 
+/// A widget for displaying an image with fullscreen capabilities.
+class ImageView extends StatelessWidget {
+  final ImageController controller = Get.find();
+  final RxBool isFullscreen = false.obs; // Moved to class level for better access
+  final RxBool isMenuOpen = false.obs;
 
-class ImageView extends StatefulWidget {
-  final ImageController controller;
-
-  const ImageView({super.key, required this.controller});
-
-  @override
-  ImageViewState createState() => ImageViewState();
-}
-
-class ImageViewState extends State<ImageView> {
-  bool _isFullscreen = false;
-
-  // JavaScript function to toggle fullscreen mode
-  void _toggleFullscreen(String imageUrl) {
-    if (_isFullscreen) {
-      js.context.callMethod('exitFullscreen'); // Exit fullscreen
-    } else {
-      js.context.callMethod('toggleFullscreen', [imageUrl]); // Enter fullscreen
-    }
-    setState(() {
-      _isFullscreen = !_isFullscreen; // Toggle fullscreen state
+  ImageView({super.key}) {
+    // Add keyboard event listener for Esc key
+    html.window.addEventListener('keydown', (event) {
+      if (event is html.KeyboardEvent && event.key == 'Escape' && isFullscreen.value) {
+        _toggleFullscreen(controller.model.value.imageUrl);
+      }
     });
+  }
+
+  /// Toggles fullscreen mode for the image.
+  void _toggleFullscreen(String imageUrl) {
+    if (isFullscreen.value) {
+      js.context.callMethod('exitFullscreen');
+    } else {
+      js.context.callMethod('toggleFullscreen', [imageUrl]);
+    }
+    isFullscreen.toggle();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Image Viewer'),
+        title: const Text('Image Viewer'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back), // Back button icon
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            if (_isFullscreen) {
-              _toggleFullscreen(widget.controller.model.imageUrl); // Exit fullscreen
+            if (isFullscreen.value) {
+              _toggleFullscreen(controller.model.value.imageUrl);
             } else {
-              Navigator.pop(context); // Navigate back to the previous screen
+              Navigator.pop(context);
             }
           },
         ),
       ),
-      body: Center(
-        child: widget.controller.model.imageUrl.isNotEmpty
-            ? GestureDetector(
-                onDoubleTap: () => _toggleFullscreen(widget.controller.model.imageUrl),
-                child: Image.network(
-                  widget.controller.model.imageUrl,
-                  loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                            : null,
-                      ),
-                    );
-                  },
-                  errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                    return Text('Failed to load image');
-                  },
+      body: Stack(
+        children: [
+          Center(
+            child: Obx(() => controller.model.value.imageUrl.isNotEmpty
+                ? GestureDetector(
+                    onDoubleTap: () => _toggleFullscreen(controller.model.value.imageUrl),
+                    child: Image.network(
+                      controller.model.value.imageUrl,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, exception, stackTrace) =>
+                          const Text('Failed to load image'),
+                    ),
+                  )
+                : const Text('No Image Loaded')),
+          ),
+          Obx(() => isMenuOpen.value
+              ? GestureDetector(
+                  onTap: () => isMenuOpen.value = false,
+                  child: Container(
+                    color: Colors.black54,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                )
+              : const SizedBox.shrink()),
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: Column(
+              children: [
+                Obx(() => isMenuOpen.value
+                    ? Card(
+                        child: Column(
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                _toggleFullscreen(controller.model.value.imageUrl);
+                                isMenuOpen.value = false;
+                              },
+                              child: Text(isFullscreen.value ? 'Exit Fullscreen' : 'Enter Fullscreen'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : const SizedBox.shrink()),
+                FloatingActionButton(
+                  onPressed: () => isMenuOpen.value = !isMenuOpen.value,
+                  child: const Icon(Icons.add),
                 ),
-              )
-            : Text('No Image Loaded'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showContextMenu(context);
-        },
-        child: Icon(Icons.add),
+              ],
+            ),
+          ),
+        ],
       ),
     );
-  }
-
-  void _showContextMenu(BuildContext context) {
-    final RenderBox button = context.findRenderObject() as RenderBox; // Get the button's render object
-    final Offset buttonOffset = button.localToGlobal(Offset.zero); // Get the button's position
-    final RelativeRect position = RelativeRect.fromLTRB(
-      buttonOffset.dx, // Left
-      buttonOffset.dy - 100, // Top (adjust this value to position the menu above the button)
-      buttonOffset.dx + button.size.width, // Right
-      buttonOffset.dy + button.size.height, // Bottom
-    );
-
-    showMenu(
-      context: context,
-      position: position,
-      items: [
-        PopupMenuItem(
-          value: 'enter_fullscreen',
-          child: Text('Enter fullscreen'),
-        ),
-        PopupMenuItem(
-          value: 'exit_fullscreen',
-          child: Text('Exit fullscreen'),
-        ),
-      ],
-    ).then((value) {
-      if (value == 'enter_fullscreen') {
-        _toggleFullscreen(widget.controller.model.imageUrl);
-      } else if (value == 'exit_fullscreen') {
-        _toggleFullscreen(widget.controller.model.imageUrl); // Exit fullscreen
-      }
-    });
   }
 }

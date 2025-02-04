@@ -1,37 +1,28 @@
 import 'package:ass_proj/controllers/image_controller.dart';
 import 'package:ass_proj/controllers/url_controller.dart';
-import 'package:ass_proj/models/image_model.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'image_view.dart';
 
-
-
-class UrlInputView extends StatefulWidget {
-  const UrlInputView({super.key});
-
-  @override
-  UrlInputViewState createState() => UrlInputViewState();
-}
-
-class UrlInputViewState extends State<UrlInputView> {
+/// A widget for inputting image URLs.
+class UrlInputView extends StatelessWidget {
   final TextEditingController _urlController = TextEditingController();
-  final UrlController _urlControllerInstance = UrlController();
+  final ImageController imageController = Get.put(ImageController());
+  final UrlController urlController = Get.put(UrlController());
 
-  void _onSubmit() {
-    String url = _urlController.text.trim();
+  /// Handles URL submission and navigates to [ImageView].
+  void _onSubmit(BuildContext context) {
+    final url = _urlController.text.trim();
     if (url.isNotEmpty) {
-      _urlControllerInstance.setUrl(url);
+      urlController.setUrl(url);
+      imageController.updateImageUrl(url);
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => ImageView(
-            controller: ImageController(ImageModel(imageUrl: url)),
-          ),
-        ),
+        MaterialPageRoute(builder: (context) => ImageView()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter a valid URL")),
+        const SnackBar(content: Text("Please enter a valid URL")),
       );
     }
   }
@@ -39,7 +30,7 @@ class UrlInputViewState extends State<UrlInputView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("URL Input (MVC)")),
+      appBar: AppBar(title: const Text("URL Input (MVC)")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -47,16 +38,16 @@ class UrlInputViewState extends State<UrlInputView> {
           children: [
             TextField(
               controller: _urlController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Enter URL",
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.url,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _onSubmit,
-              child: Text("Submit"),
+              onPressed: () => _onSubmit(context),
+              child: const Text("Submit"),
             ),
           ],
         ),

@@ -1,15 +1,20 @@
-
-
+import 'package:get/get.dart';
 import 'package:ass_proj/models/url_model.dart';
 
-class UrlController {
-  final UrlModel _urlModel = UrlModel();
+/// Controller class for managing URL-related operations using GetX.
+class UrlController extends GetxController {
+  /// Reactive URL model.
+  final Rx<UrlModel> urlModel = UrlModel().obs;
 
+  /// Sets the URL in the model.
   void setUrl(String newUrl) {
-    _urlModel.url = newUrl;
+    urlModel.update((val) {
+      if (val != null) val.url = newUrl;
+    });
   }
 
+  /// Retrieves the current URL.
   String getUrl() {
-    return _urlModel.url;
+    return urlModel.value.url;
   }
 }
