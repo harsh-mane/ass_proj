@@ -10,6 +10,8 @@ class UrlInputView extends StatelessWidget {
   final ImageController imageController = Get.put(ImageController());
   final UrlController urlController = Get.put(UrlController());
 
+  UrlInputView({super.key});
+
   /// Handles URL submission and navigates to [ImageView].
   void _onSubmit(BuildContext context) {
     final url = _urlController.text.trim();
